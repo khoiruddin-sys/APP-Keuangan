@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keuangan</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Pencatatan Keuangan</h1>
+
+    <div class="form-section">
+      <!-- month filter stays visible -->
+      <select id="monthFilter" onchange="renderTable()">
+        <option value="all">Semua Bulan</option>
+      </select>
+      <!-- button opens modal for adding transaction -->
+      <button class="open-modal" onclick="openModal()">Tambah Transaksi</button>
+    </div>
+
+    <!-- Modal for input -->
+    <div id="modalOverlay" class="modal-overlay" style="display:none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Tambah Transaksi</h3>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-row modal-row-type">
+            <label for="type">Jenis Transaksi</label>
+            <select id="type">
+              <option value="pemasukan">Pemasukan</option>
+              <option value="pengeluaran">Pengeluaran</option>
+            </select>
+          </div>
+
+          <div class="modal-row modal-row-date">
+            <label for="date">Tanggal</label>
+            <input type="date" id="date" required />
+          </div>
+
+          <div class="modal-row modal-row-category">
+            <label for="category">Kategori</label>
+            <input type="text" id="category" placeholder="Kategori" />
+          </div>
+
+          <div class="modal-row modal-row-amount">
+            <label for="amount">Nominal</label>
+            <input type="number" id="amount" placeholder="Nominal" />
+          </div>
+
+          <div class="modal-row modal-row-note">
+            <label for="note">Keterangan</label>
+            <input type="text" id="note" placeholder="Keterangan" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button onclick="submitModal()" class="btn-primary">Simpan</button>
+          <button onclick="closeModal()" class="btn-secondary">Batal</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card card-income">
+        <div class="card-icon">💰</div>
+        <div class="card-body">
+          <div class="card-title">Pemasukan</div>
+          <div class="card-amount" id="income">0</div>
+        </div>
+      </div>
+
+      <div class="card card-expense">
+        <div class="card-icon">💸</div>
+        <div class="card-body">
+          <div class="card-title">Pengeluaran</div>
+          <div class="card-amount" id="expense">0</div>
+        </div>
+      </div>
+
+      <div class="card card-balance">
+        <div class="card-icon">📊</div>
+        <div class="card-body">
+          <div class="card-title">Saldo</div>
+          <div class="card-amount" id="balance">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- type toggle: All / Pemasukan / Pengeluaran -->
+    <div class="type-toggle" role="tablist" aria-label="Filter jenis transaksi">
+      <button id="toggle-all" class="toggle-btn active" onclick="setTypeFilter('all')">Semua</button>
+      <button id="toggle-income" class="toggle-btn" onclick="setTypeFilter('pemasukan')">Pemasukan</button>
+      <button id="toggle-expense" class="toggle-btn" onclick="setTypeFilter('pengeluaran')">Pengeluaran</button>
+    </div>
+
+    <table id="transactionTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Jenis</th>
+          <th>Kategori</th>
+          <th>Nominal</th>
+          <th>Keterangan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
