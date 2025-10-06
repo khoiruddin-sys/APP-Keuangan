@@ -60,9 +60,52 @@ function submitModal() {
     return;
   }
 
-  // reuse existing function
-  addTransaction();
+  const editId = document.getElementById('editId').value;
+  if (editId) {
+    // save edits
+    saveEditedTransaction(parseInt(editId, 10));
+  } else {
+    // reuse existing function to add
+    addTransaction();
+  }
   closeModal();
+}
+
+// open modal to edit an existing transaction
+function openEditModal(id) {
+  const t = transactions.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('modalTitle').innerText = 'Edit Transaksi';
+  document.getElementById('date').value = t.date;
+  document.getElementById('type').value = t.type;
+  document.getElementById('category').value = t.category;
+  document.getElementById('amount').value = t.amount;
+  document.getElementById('note').value = t.note;
+  document.getElementById('editId').value = t.id;
+  applyModalTheme();
+  const overlay = document.getElementById('modalOverlay');
+  if (overlay) overlay.style.display = 'block';
+}
+
+function saveEditedTransaction(id) {
+  const idx = transactions.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  const date = document.getElementById("date").value;
+  const type = document.getElementById("type").value;
+  const category = document.getElementById("category").value;
+  const amount = parseFloat(document.getElementById("amount").value);
+  const note = document.getElementById("note").value;
+
+  if (!date || !category || !amount) {
+    alert("Isi semua data dengan benar!");
+    return;
+  }
+
+  transactions[idx] = { id, date, type, category, amount, note };
+  // clear editId
+  document.getElementById('editId').value = '';
+  document.getElementById('modalTitle').innerText = 'Tambah Transaksi';
+  saveData();
 }
 
 function setTypeFilter(filter) {
@@ -137,7 +180,10 @@ function renderTable() {
         <td>${t.category}</td>
         <td>${t.amount.toLocaleString()}</td>
         <td>${t.note}</td>
-        <td><button class="delete" onclick="deleteTransaction(${t.id})">Hapus</button></td>
+        <td>
+          <button class="edit" onclick="openEditModal(${t.id})">Edit</button>
+          <button class="delete" onclick="deleteTransaction(${t.id})">Hapus</button>
+        </td>
       `;
       tbody.appendChild(row);
 
