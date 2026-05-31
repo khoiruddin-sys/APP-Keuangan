@@ -23,25 +23,15 @@
       <div class="menu">
         <button class="menu-btn active">
           <i class="fa-solid fa-chart-pie"></i>
-          Dashboard
+          <span>Dashboard</span>
         </button>
-
-        <!-- <button class="menu-btn">
-          <i class="fa-solid fa-receipt"></i>
-          Transaksi
-        </button>
-
-        <button class="menu-btn">
-          <i class="fa-solid fa-chart-line"></i>
-          Statistik
-        </button> -->
       </div>
     </aside>
 
     <main class="main-content">
 
       <div class="topbar">
-        <div>
+        <div class="topbar-text">
           <h1>Dashboard Keuangan</h1>
           <p>Pantau pemasukan dan pengeluaran</p>
         </div>
@@ -64,7 +54,6 @@
           <div class="card-icon">
             <i class="fa-solid fa-arrow-trend-up"></i>
           </div>
-
           <div>
             <span>Pemasukan</span>
             <h2 id="income">Rp 0</h2>
@@ -75,7 +64,6 @@
           <div class="card-icon">
             <i class="fa-solid fa-arrow-trend-down"></i>
           </div>
-
           <div>
             <span>Pengeluaran</span>
             <h2 id="expense">Rp 0</h2>
@@ -86,7 +74,6 @@
           <div class="card-icon">
             <i class="fa-solid fa-scale-balanced"></i>
           </div>
-
           <div>
             <span>Saldo</span>
             <h2 id="balance">Rp 0</h2>
@@ -100,11 +87,9 @@
           <button id="toggle-all" class="toggle-btn active" onclick="setTypeFilter('all')">
             Semua
           </button>
-
           <button id="toggle-income" class="toggle-btn" onclick="setTypeFilter('pemasukan')">
             Pemasukan
           </button>
-
           <button id="toggle-expense" class="toggle-btn" onclick="setTypeFilter('pengeluaran')">
             Pengeluaran
           </button>
@@ -123,7 +108,6 @@
               <th>Aksi</th>
             </tr>
           </thead>
-
           <tbody></tbody>
         </table>
       </div>
@@ -132,22 +116,17 @@
   </div>
 
   <div id="modalOverlay" class="modal-overlay">
-
     <div class="modal">
-
       <div class="modal-header">
         <h3 id="modalTitle">Tambah Transaksi</h3>
-
         <button class="close-btn" onclick="closeModal()">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <div class="modal-body">
-
         <div class="input-group">
           <label>Jenis Transaksi</label>
-
           <select id="type">
             <option value="pemasukan">Pemasukan</option>
             <option value="pengeluaran">Pengeluaran</option>
@@ -173,26 +152,17 @@
           <label>Keterangan</label>
           <input type="text" id="note" placeholder="Catatan tambahan..." />
         </div>
-
       </div>
 
       <input type="hidden" id="editId">
 
       <div class="modal-footer">
-        <button class="cancel-btn" onclick="closeModal()">
-          Batal
-        </button>
-
-        <button class="save-btn" onclick="submitModal()">
-          Simpan
-        </button>
+        <button class="cancel-btn" onclick="closeModal()">Batal</button>
+        <button class="save-btn" onclick="submitModal()">Simpan</button>
       </div>
-
     </div>
-
   </div>
 
   <script src="script.js"></script>
-
 </body>
 </html>
