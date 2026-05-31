@@ -31,14 +31,13 @@ body{
   min-height:100vh;
 }
 
-/* Sidebar */
+/* Sidebar (Desktop) */
 
 .sidebar{
   width:260px;
   background:rgba(15,23,42,.75);
   backdrop-filter:blur(18px);
   border-right:1px solid rgba(255,255,255,.08);
-  /* padding-top disesuaikan menjadi 40px agar menu teratas memiliki jarak yang pas setelah logo dihapus */
   padding:40px 28px 28px 28px;
 }
 
@@ -69,7 +68,7 @@ body{
   color:white;
 }
 
-/* Main */
+/* Main Content */
 
 .main-content{
   flex:1;
@@ -184,7 +183,7 @@ body{
   font-size:30px;
 }
 
-/* Filter */
+/* Filter Section */
 
 .filter-section{
   margin-bottom:20px;
@@ -214,7 +213,7 @@ body{
   color:white;
 }
 
-/* Table */
+/* Table Layout */
 
 .table-wrapper{
   background:rgba(255,255,255,.06);
@@ -253,13 +252,7 @@ tbody tr:hover{
   background:rgba(255,255,255,.04);
 }
 
-.month-header td{
-  background:rgba(59,130,246,.15);
-  font-weight:700;
-  color:#60a5fa;
-}
-
-/* Buttons */
+/* Table Buttons */
 
 .edit{
   border:none;
@@ -280,7 +273,7 @@ tbody tr:hover{
   cursor:pointer;
 }
 
-/* Modal */
+/* Modal Layout */
 
 .modal-overlay{
   position:fixed;
@@ -382,28 +375,148 @@ tbody tr:hover{
   cursor:pointer;
 }
 
-/* Mobile */
+/* ==========================================================================
+   Responsive Breakpoints (Mobile & Tablet)
+   ========================================================================== */
 
 @media(max-width:900px){
-
+  /* Berubah menjadi Bottom Nav Bar */
   .sidebar{
-    display:none;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    width:100%;
+    height:68px;
+    background:rgba(15,23,42,.92);
+    backdrop-filter:blur(20px);
+    border-right:none;
+    border-top:1px solid rgba(255,255,255,.08);
+    padding:0;
+    z-index:999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
 
+  .menu{
+    width:100%;
+    flex-direction:row;
+    justify-content:center;
+    gap:0;
+  }
+
+  .menu-btn{
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:8px;
+    font-size:12px;
+    border-radius:0;
+    background:transparent;
+    flex:1;
+    text-align:center;
+  }
+
+  .menu-btn i{
+    font-size:18px;
+  }
+
+  /* Ruang konten disesuaikan agar tidak terpotong Bottom Nav Bar */
   .main-content{
     padding:20px;
+    padding-bottom:100px; 
+  }
+
+  .topbar{
+    margin-bottom:24px;
   }
 
   .topbar h1{
     font-size:28px;
   }
 
-  table{
-    min-width:700px;
+  /* Penyesuaian Elemen Aksi Atas */
+  .topbar-text{
+    width:100%;
   }
 
+  .top-actions{
+    width:100%;
+    display:flex;
+    gap:10px;
+  }
+
+  .top-actions select,
+  .add-btn{
+    flex:1;
+    text-align:center;
+    justify-content:center;
+  }
+
+  /* Modifikasi Filter Tab di Mobile */
+  .type-toggle{
+    width:100%;
+  }
+
+  .toggle-btn{
+    flex:1;
+    text-align:center;
+    padding:10px 0;
+  }
+
+  /* Mengatasi Luapan Tabel */
   .table-wrapper{
-    overflow:auto;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
   }
 
+  table{
+    min-width:650px;
+  }
+
+  th, td{
+    padding:14px 12px;
+    font-size:13px;
+  }
+
+  /* Animasi Modal khusus Ponsel Pintar (Muncul dari Bawah) */
+  .modal{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    border-radius:24px 24px 0 0;
+    max-height:85vh;
+    overflow-y:auto;
+    animation:slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp{
+    from{
+      transform:translateY(100%);
+    }
+    to{
+      transform:translateY(0);
+    }
+  }
+}
+
+@media(max-width:480px){
+  /* Memperkecil kartu ringkasan saat layar sangat sempit */
+  .card{
+    padding:18px;
+    gap:14px;
+  }
+
+  .card-icon{
+    width:50px;
+    height:50px;
+    font-size:20px;
+    border-radius:14px;
+  }
+
+  .card h2{
+    font-size:24px;
+  }
 }
