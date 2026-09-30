@@ -1,323 +1,128 @@
-let transactions =
-  JSON.parse(localStorage.getItem("transactions")) || [];
-
-let typeFilter = "all";
-
-function saveData() {
-  localStorage.setItem(
-    "transactions",
-    JSON.stringify(transactions)
+let data = [];
+try {
+  data = JSON.parse(localStorage.getItem("keuangan") || "[]");
+} catch (e) {}
+const $ = (id) => document.getElementById(id);
+const rp = (n) => "Rp " + n.toLocaleString("id-ID");
+const form = $("f");
+const submitEntry = $("submit-entry");
+const cancelEditButton = $("cancel-edit");
+const themeToggle = $("theme-toggle");
+let savedTheme = null;
+try {
+  savedTheme = localStorage.getItem("tema");
+} catch (e) {}
+if (savedTheme === "light" || savedTheme === "dark") {
+  document.documentElement.dataset.theme = savedTheme;
+}
+function isDarkTheme() {
+  const theme = document.documentElement.dataset.theme;
+  return theme
+    ? theme === "dark"
+    : window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function updateThemeToggle() {
+  const isDark = isDarkTheme();
+  themeToggle.textContent = isDark ? "Mode terang" : "Mode gelap";
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+}
+themeToggle.addEventListener("click", () => {
+  const theme = isDarkTheme() ? "light" : "dark";
+  document.documentElement.dataset.theme = theme;
+  try {
+    localStorage.setItem("tema", theme);
+  } catch (e) {}
+  updateThemeToggle();
+});
+updateThemeToggle();
+const tgl = (s) =>
+  new Date(s + "T00:00").toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+$("f").tgl.value = new Date().toISOString().slice(0, 10);
+function save() {
+  try {
+    localStorage.setItem("keuangan", JSON.stringify(data));
+  } catch (e) {}
+}
+function resetEdit() {
+  delete form.dataset.editId;
+  form.reset();
+  form.tgl.value = new Date().toISOString().slice(0, 10);
+  submitEntry.textContent = "Tambah catatan";
+  cancelEditButton.hidden = true;
+}
+cancelEditButton.addEventListener("click", resetEdit);
+function esc(s) {
+  return s.replace(
+    /[&<>\"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '\"': "&quot;" })[c],
   );
-
-  renderTable();
 }
-
-function openModal() {
-  document.getElementById("modalOverlay").style.display = "flex";
+function render() {
+  let sum = { in: 0, out: 0 };
+  for (const j of ["in", "out"]) {
+    const items = data
+      .filter((d) => d.jenis === j)
+      .sort((a, b) => b.tgl.localeCompare(a.tgl));
+    sum[j] = items.reduce((a, d) => a + d.nominal, 0);
+    $("l" + j).innerHTML = items.length
+      ? items
+          .map(
+            (d) =>
+              `<li><div>${esc(d.ket)}<small>${tgl(d.tgl)}</small></div><div class="entry-actions"><span class="amt">${rp(d.nominal)}</span><button type="button" class="edit-button" data-edit-id="${d.id}" aria-label="Edit catatan">Edit</button><button type="button" data-id="${d.id}" aria-label="Hapus">×</button></div></li>`,
+          )
+          .join("")
+      : '<div class="empty">Belum ada catatan.</div>';
+    $("t" + j).textContent = rp(sum[j]);
+  }
+  $("saldo").textContent = rp(sum.in - sum.out);
 }
-
-function closeModal() {
-  document.getElementById("modalOverlay").style.display = "none";
-
-  document.getElementById("editId").value = "";
-  document.getElementById("modalTitle").innerText =
-    "Tambah Transaksi";
-
-  clearForm();
-}
-
-function clearForm() {
-  document.getElementById("date").value = "";
-  document.getElementById("category").value = "";
-  document.getElementById("amount").value = "";
-  document.getElementById("note").value = "";
-}
-
-function submitModal() {
-
-  const date = document.getElementById("date").value;
-  const type = document.getElementById("type").value;
-  const category = document.getElementById("category").value;
-  const amount = parseFloat(
-    document.getElementById("amount").value
-  );
-  const note = document.getElementById("note").value;
-
-  if (!date || !category || !amount) {
-    alert("Isi semua data!");
+$("f").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const editId = f.dataset.editId;
+  const entry = {
+    id: editId ? Number(editId) : Date.now(),
+    jenis: f.jenis.value,
+    nominal: +f.nominal.value,
+    tgl: f.tgl.value,
+    ket: f.ket.value.trim(),
+  };
+  if (editId) {
+    const index = data.findIndex((d) => String(d.id) === editId);
+    if (index !== -1) data[index] = entry;
+  } else {
+    data.push(entry);
+  }
+  save();
+  render();
+  resetEdit();
+  f.nominal.focus();
+});
+document.addEventListener("click", (e) => {
+  const editId = e.target.dataset && e.target.dataset.editId;
+  if (editId) {
+    const entry = data.find((d) => String(d.id) === editId);
+    if (!entry) return;
+    form.dataset.editId = editId;
+    form.jenis.value = entry.jenis;
+    form.nominal.value = entry.nominal;
+    form.tgl.value = entry.tgl;
+    form.ket.value = entry.ket;
+    submitEntry.textContent = "Simpan perubahan";
+    cancelEditButton.hidden = false;
+    form.nominal.focus();
     return;
   }
-
-  const editId =
-    document.getElementById("editId").value;
-
-  if (editId) {
-
-    const index = transactions.findIndex(
-      (t) => t.id == editId
-    );
-
-    transactions[index] = {
-      id: Number(editId),
-      date,
-      type,
-      category,
-      amount,
-      note,
-    };
-
-  } else {
-
-    transactions.push({
-      id: Date.now(),
-      date,
-      type,
-      category,
-      amount,
-      note,
-    });
-
+  const id = e.target.dataset && e.target.dataset.id;
+  if (id) {
+    if (form.dataset.editId === id) resetEdit();
+    data = data.filter((d) => d.id != id);
+    save();
+    render();
   }
-
-  saveData();
-  closeModal();
-}
-
-function openEditModal(id) {
-
-  const t = transactions.find(
-    (item) => item.id === id
-  );
-
-  if (!t) return;
-
-  document.getElementById("modalTitle").innerText =
-    "Edit Transaksi";
-
-  document.getElementById("editId").value = t.id;
-  document.getElementById("date").value = t.date;
-  document.getElementById("type").value = t.type;
-  document.getElementById("category").value = t.category;
-  document.getElementById("amount").value = t.amount;
-  document.getElementById("note").value = t.note;
-
-  openModal();
-}
-
-function deleteTransaction(id) {
-
-  if (!confirm("Hapus transaksi ini?")) return;
-
-  transactions = transactions.filter(
-    (t) => t.id !== id
-  );
-
-  saveData();
-}
-
-function setTypeFilter(filter) {
-
-  typeFilter = filter;
-
-  document
-    .querySelectorAll(".toggle-btn")
-    .forEach((btn) =>
-      btn.classList.remove("active")
-    );
-
-  if (filter === "all")
-    document
-      .getElementById("toggle-all")
-      .classList.add("active");
-
-  if (filter === "pemasukan")
-    document
-      .getElementById("toggle-income")
-      .classList.add("active");
-
-  if (filter === "pengeluaran")
-    document
-      .getElementById("toggle-expense")
-      .classList.add("active");
-
-  renderTable();
-}
-
-function renderTable() {
-
-  const tbody =
-    document.querySelector(
-      "#transactionTable tbody"
-    );
-
-  tbody.innerHTML = "";
-
-  populateMonthFilter();
-
-  const selectedMonth =
-    document.getElementById("monthFilter").value;
-
-  let income = 0;
-  let expense = 0;
-
-  const grouped = {};
-
-  transactions.forEach((t) => {
-
-    const monthKey = t.date.slice(0, 7);
-
-    if (!grouped[monthKey]) {
-      grouped[monthKey] = [];
-    }
-
-    grouped[monthKey].push(t);
-  });
-
-  const monthKeys = Object.keys(grouped)
-    .sort((a, b) => b.localeCompare(a));
-
-  monthKeys.forEach((month) => {
-
-    if (
-      selectedMonth !== "all" &&
-      selectedMonth !== month
-    ) return;
-
-    const header = document.createElement("tr");
-    header.classList.add("month-header");
-
-    header.innerHTML = `
-      <td colspan="6">
-        ${formatMonthLabel(month)}
-      </td>
-    `;
-
-    tbody.appendChild(header);
-
-    grouped[month]
-      .sort((a, b) =>
-        b.date.localeCompare(a.date)
-      )
-
-      .forEach((t) => {
-
-        if (
-          typeFilter !== "all" &&
-          t.type !== typeFilter
-        ) return;
-
-        if (t.type === "pemasukan") {
-          income += t.amount;
-        } else {
-          expense += t.amount;
-        }
-
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-          <td>${t.date}</td>
-
-          <td>
-            ${
-              t.type === "pemasukan"
-                ? "🟢 Pemasukan"
-                : "🔴 Pengeluaran"
-            }
-          </td>
-
-          <td>${t.category}</td>
-
-          <td>
-            Rp ${t.amount.toLocaleString("id-ID")}
-          </td>
-
-          <td>${t.note || "-"}</td>
-
-          <td>
-            <button class="edit"
-              onclick="openEditModal(${t.id})">
-              Edit
-            </button>
-
-            <button class="delete"
-              onclick="deleteTransaction(${t.id})">
-              Hapus
-            </button>
-          </td>
-        `;
-
-        tbody.appendChild(row);
-      });
-  });
-
-  document.getElementById("income").innerText =
-    "Rp " + income.toLocaleString("id-ID");
-
-  document.getElementById("expense").innerText =
-    "Rp " + expense.toLocaleString("id-ID");
-
-  document.getElementById("balance").innerText =
-    "Rp " +
-    (income - expense).toLocaleString("id-ID");
-}
-
-function populateMonthFilter() {
-
-  const select =
-    document.getElementById("monthFilter");
-
-  const current = select.value || "all";
-
-  const months = new Set();
-
-  transactions.forEach((t) => {
-    months.add(t.date.slice(0, 7));
-  });
-
-  select.innerHTML =
-    '<option value="all">Semua Bulan</option>';
-
-  Array.from(months)
-    .sort((a, b) => b.localeCompare(a))
-
-    .forEach((month) => {
-
-      const option =
-        document.createElement("option");
-
-      option.value = month;
-      option.innerText =
-        formatMonthLabel(month);
-
-      select.appendChild(option);
-    });
-
-  select.value = current;
-}
-
-function formatMonthLabel(month) {
-
-  const [year, monthNumber] =
-    month.split("-");
-
-  const months = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
-  return `${
-    months[parseInt(monthNumber) - 1]
-  } ${year}`;
-}
-
-renderTable();
+});
+render();
