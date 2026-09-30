@@ -1,168 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KeuanganKu</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-
-  <div class="background-glow"></div>
-
-  <div class="app">
-
-    <aside class="sidebar">
-      <div class="menu">
-        <button class="menu-btn active">
-          <i class="fa-solid fa-chart-pie"></i>
-          <span>Dashboard</span>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Dashboard Keuangan</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="toolbar">
+        <h1>Dashboard Keuangan</h1>
+        <button id="theme-toggle" type="button" aria-pressed="false">
+          Mode gelap
         </button>
       </div>
-    </aside>
-
-    <main class="main-content">
-
-      <div class="topbar">
-        <div class="topbar-text">
-          <h1>Dashboard Keuangan</h1>
-          <p>Pantau pemasukan dan pengeluaran</p>
-        </div>
-
-        <div class="top-actions">
-          <select id="monthFilter" onchange="renderTable()">
-            <option value="all">Semua Bulan</option>
-          </select>
-
-          <button class="add-btn" onclick="openModal()">
-            <i class="fa-solid fa-plus"></i>
-            Tambah
-          </button>
-        </div>
+      <form id="f">
+        <select name="jenis" aria-label="Jenis">
+          <option value="in">Pemasukan</option>
+          <option value="out">Pengeluaran</option>
+        </select>
+        <input
+          name="nominal"
+          type="number"
+          min="1"
+          placeholder="Nominal (Rp)"
+          required
+        />
+        <input name="tgl" type="date" required />
+        <input name="ket" placeholder="Keterangan" required />
+        <button id="submit-entry" type="submit">Tambah catatan</button>
+        <button id="cancel-edit" class="secondary-button" type="button" hidden>
+          Batal
+        </button>
+      </form>
+      <div class="grid">
+        <section class="card balance">
+          <div class="head">
+            <h2>Saldo</h2>
+            <span class="total" id="saldo"></span>
+          </div>
+        </section>
+        <section class="card in">
+          <div class="head">
+            <h2>Pemasukan</h2>
+            <span class="total" id="tin"></span>
+          </div>
+          <ul id="lin"></ul>
+        </section>
+        <section class="card out">
+          <div class="head">
+            <h2>Pengeluaran</h2>
+            <span class="total" id="tout"></span>
+          </div>
+          <ul id="lout"></ul>
+        </section>
       </div>
-
-      <div class="cards">
-
-        <div class="card income-card">
-          <div class="card-icon">
-            <i class="fa-solid fa-arrow-trend-up"></i>
-          </div>
-          <div>
-            <span>Pemasukan</span>
-            <h2 id="income">Rp 0</h2>
-          </div>
-        </div>
-
-        <div class="card expense-card">
-          <div class="card-icon">
-            <i class="fa-solid fa-arrow-trend-down"></i>
-          </div>
-          <div>
-            <span>Pengeluaran</span>
-            <h2 id="expense">Rp 0</h2>
-          </div>
-        </div>
-
-        <div class="card balance-card">
-          <div class="card-icon">
-            <i class="fa-solid fa-scale-balanced"></i>
-          </div>
-          <div>
-            <span>Saldo</span>
-            <h2 id="balance">Rp 0</h2>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="filter-section">
-        <div class="type-toggle">
-          <button id="toggle-all" class="toggle-btn active" onclick="setTypeFilter('all')">
-            Semua
-          </button>
-          <button id="toggle-income" class="toggle-btn" onclick="setTypeFilter('pemasukan')">
-            Pemasukan
-          </button>
-          <button id="toggle-expense" class="toggle-btn" onclick="setTypeFilter('pengeluaran')">
-            Pengeluaran
-          </button>
-        </div>
-      </div>
-
-      <div class="table-wrapper">
-        <table id="transactionTable">
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Jenis</th>
-              <th>Kategori</th>
-              <th>Nominal</th>
-              <th>Keterangan</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
     </main>
-  </div>
-
-  <div id="modalOverlay" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="modalTitle">Tambah Transaksi</h3>
-        <button class="close-btn" onclick="closeModal()">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="input-group">
-          <label>Jenis Transaksi</label>
-          <select id="type">
-            <option value="pemasukan">Pemasukan</option>
-            <option value="pengeluaran">Pengeluaran</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label>Tanggal</label>
-          <input type="date" id="date" />
-        </div>
-
-        <div class="input-group">
-          <label>Kategori</label>
-          <input type="text" id="category" placeholder="Contoh: Gaji, Makan..." />
-        </div>
-
-        <div class="input-group">
-          <label>Nominal</label>
-          <input type="number" id="amount" placeholder="Masukkan nominal" />
-        </div>
-
-        <div class="input-group">
-          <label>Keterangan</label>
-          <input type="text" id="note" placeholder="Catatan tambahan..." />
-        </div>
-      </div>
-
-      <input type="hidden" id="editId">
-
-      <div class="modal-footer">
-        <button class="cancel-btn" onclick="closeModal()">Batal</button>
-        <button class="save-btn" onclick="submitModal()">Simpan</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
-</body>
+    <script src="main.js"></script>
+  </body>
 </html>
